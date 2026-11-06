@@ -64,7 +64,7 @@ void printTree(const Node* root, int level)
     printTree(root->left, level + 1);
 }
 
-int countOccurrences(const Node* root, int value)
+int countOccurrences(const Node* root, int value, int level)
 {
     if (root == NULL)
     {
@@ -73,15 +73,16 @@ int countOccurrences(const Node* root, int value)
 
     if (value < root->data)
     {
-        return countOccurrences(root->left, value);
+        return countOccurrences(root->left, value, level + 1);
     }
 
     if (value > root->data)
     {
-        return countOccurrences(root->right, value);
+        return countOccurrences(root->right, value, level + 1);
     }
 
-    return 1 + countOccurrences(root->right, value);
+    printf("Значение %d найдено на уровне %d\n", value, level);
+    return 1 + countOccurrences(root->right, value, level + 1);
 }
 
 void deleteTree(Node* root)
@@ -145,8 +146,14 @@ int main()
         return 1;
     }
 
-    const int count = countOccurrences(root, value);
+    printf("\nУровни вхождений (корень — уровень 0):\n");
+    const int count = countOccurrences(root, value, 0);
     printf("Число вхождений значения %d: %d\n", value, count);
+
+    if (count == 0)
+    {
+        printf("Значение в дереве не найдено.\n");
+    }
 
     deleteTree(root);
     return 0;
