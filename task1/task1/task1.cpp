@@ -65,13 +65,20 @@ void findVerticles(int** matrix, int N) {
 }
 
 int main() {
-    srand(time(0));
 	setlocale(LC_ALL, ".UTF8");
+    setlocale(LC_NUMERIC, "C");
     int N;
     printf("Введите количество вершин графа: ");
-    scanf("%d", &N);
-    if (N <= 0) {
+    if (scanf("%d", &N) != 1 || N <= 0) {
         printf("Ошибка: количество вершин должно быть положительным.\n");
+        return 1;
+    }
+
+    double probability;
+    printf("Введите вероятность появления ребра от 0 до 1 (например, 0.5): ");
+    if (scanf("%lf", &probability) != 1 ||
+        !(probability >= 0.0 && probability <= 1.0)) {
+        printf("Ошибка: вероятность должна быть числом от 0 до 1.\n");
         return 1;
     }
 
@@ -96,7 +103,8 @@ int main() {
     for (int i = 0; i < N; i++) {
         matrix[i][i] = 0;
         for (int j = i + 1; j < N; j++) {
-            matrix[i][j] = rand() % 2;
+            double randomValue = rand() / (RAND_MAX + 1.0);
+            matrix[i][j] = (randomValue < probability) ? 1 : 0;
             matrix[j][i] = matrix[i][j];
         }
     }
