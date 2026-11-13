@@ -3,6 +3,9 @@
 #include <time.h>
 #include <stdlib.h>
 #include <clocale>
+#include <windows.h>
+
+#pragma execution_character_set("utf-8")
 
 void generateSymmetricMatrix(int** matrix, int N) {
     for (int i = 0; i < N; i++) {
@@ -65,6 +68,8 @@ void findVerticles(int** matrix, int N) {
 }
 
 int main() {
+    SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
 	setlocale(LC_ALL, ".UTF8");
     setlocale(LC_NUMERIC, "C");
     int N;
