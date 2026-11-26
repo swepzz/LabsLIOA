@@ -4,7 +4,7 @@
 #include <time.h>
 #include <locale.h>
 
-void showBinaryOperations(int **first, int firstSize, int **second, int secondSize);
+int showBinaryOperations(int **first, int firstSize, int **second, int secondSize);
 
 void generateMatrix(int** matrix, int N) {
     for (int i = 0; i < N; i++) {
@@ -230,7 +230,17 @@ int main() {
         printf("\n");
     }
 
-    showBinaryOperations(matrix, N, matrix2, N2);
+    if (!showBinaryOperations(matrix, N, matrix2, N2)) {
+        for (int i = 0; i < N; i++) {
+            free(matrix[i]);
+        }
+        for (int i = 0; i < N2; i++) {
+            free(matrix2[i]);
+        }
+        free(matrix);
+        free(matrix2);
+        return 1;
+    }
 
     int u, v;
     int** newMatrix = NULL;
@@ -478,23 +488,52 @@ static int ringEdge(int **first, int firstSize, int **second,
     return hasEdge(first, firstSize, u, v) != hasEdge(second, secondSize, u, v);
 }
 
-static void printRingSum(int **first, int firstSize, int **second,
-                         int secondSize, int size) {
+static int printRingSum(int **first, int firstSize, int **second,
+                        int secondSize, int size) {
+    long selected;
+    for (;;) {
+        char input[32];
+        char *end;
+        printf("Введите номер вершины для проверки (1–%d): ", size);
+        if (scanf("%31s", input) != 1) {
+            putchar('\n');
+            return 0;
+        }
+        selected = strtol(input, &end, 10);
+        if (*end == '\0' && selected >= 1 && selected <= size) {
+            break;
+        }
+        puts("Ошибка: введите корректный номер вершины.");
+    }
+
     int *vertices = (int *)malloc((size_t)size * sizeof *vertices);
     if (vertices == NULL) {
         fprintf(stderr, "Ошибка выделения памяти для кольцевой суммы.\n");
-        return;
+        return 0;
     }
 
     int count = 0;
+    int selectedFound = 0;
     for (int u = 0; u < size; u++) {
         for (int v = 0; v < size; v++) {
             if (ringEdge(first, firstSize, second, secondSize, u, v)) {
-                vertices[count++] = u;
+                if (u + 1 == selected) {
+                    selectedFound = 1;
+                } else {
+                    vertices[count++] = u;
+                }
                 break;
             }
         }
     }
+
+    if (selectedFound) {
+        printf("Вершина %ld есть в кольцевой сумме и удалена вместе со своими рёбрами.\n",
+               selected);
+    } else {
+        printf("Вершины %ld нет в кольцевой сумме.\n", selected);
+    }
+    puts("Результирующий граф:");
 
     if (count == 0) {
         puts("Граф пуст.");
@@ -515,9 +554,10 @@ static void printRingSum(int **first, int firstSize, int **second,
         }
     }
     free(vertices);
+    return 1;
 }
 
-void showBinaryOperations(int **first, int firstSize, int **second, int secondSize) {
+int showBinaryOperations(int **first, int firstSize, int **second, int secondSize) {
     int smallerSize = firstSize < secondSize ? firstSize : secondSize;
     int largerSize = firstSize > secondSize ? firstSize : secondSize;
 
@@ -528,5 +568,5 @@ void showBinaryOperations(int **first, int firstSize, int **second, int secondSi
     printCombinedMatrix(first, firstSize, second, secondSize, smallerSize, 2);
 
     puts("Кольцевая сумма G1 и G2:");
-    printRingSum(first, firstSize, second, secondSize, largerSize);
+    return printRingSum(first, firstSize, second, secondSize, largerSize);
 }
